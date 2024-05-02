@@ -17,18 +17,31 @@ def ej1():
         target_locations = metadata['target_locations']
         target_angles = metadata['target_angles']
 
+    # Ejercicio 1.a
+
     print(np.unique(time_go_cue - time_touch_held))
-
-    plan_spikes = extract_plan_spikes(time_touch_held, spike_times, time_go_cue)
-
+    plan_spikes = extract_plan_spikes(time_touch_held, spike_times, time_go_cue, 750)
     correct_targets, decoded_targets, test_trials = train_and_test(trial_reach_target, plan_spikes)
-
     print('Porcentaje correcto: ', np.mean(correct_targets == decoded_targets))
     print('({} episodios de testeo)'.format(len(test_trials)))
 
-    decode_perf = evaluate_window_length_performance([i for i in range(50, 750, 50)], time_touch_held, spike_times, time_go_cue, trial_reach_target)
+    # Ejercicio 1.b
 
-    graph_window_length_comparison(decode_perf)
+    # decode_perf = evaluate_window_length_performance([i for i in range(50, 800, 50)], time_touch_held, spike_times, time_go_cue, trial_reach_target)
+    # graph_window_length_comparison(decode_perf)
+
+    # Ejercicio 1.c
+    offsets = []
+    correct_percentage = []
+    for offset in range(0, 500, 10):
+        plan_spikes = extract_plan_spikes(time_touch_held, spike_times, time_go_cue, 250, offset)
+        correct_targets, decoded_targets, test_trials = train_and_test(trial_reach_target, plan_spikes)
+
+        offsets.append(offset)
+        correct_percentage.append(np.mean(correct_targets == decoded_targets))
+
+    graph_offset_comparison(offsets, correct_percentage)
+
 
 
 def extract_plan_spikes(time_touch_held, spike_times, time_go_cue, window_length=None, start_offset=None):
@@ -45,9 +58,7 @@ def extract_plan_spikes(time_touch_held, spike_times, time_go_cue, window_length
             trial_end = time_go_cue[tx]
 
         if (trial_end < trial_starts[tx]) or (trial_end > time_go_cue[tx]):
-            raise ValueError(
-                "El final del episodio (trial_end) es menor que el comienzo (trial_starts) o que el final del periodo de planificación (time_go_cue)")
-
+            raise ValueError("El final del episodio (trial_end) es menor que el comienzo (trial_starts) o que el final del periodo de planificación (time_go_cue)")
         else:
             plan_spikes.append(
                 np.array([np.sum((st > trial_starts[tx]) &
@@ -61,7 +72,7 @@ def multivariate_poisson_logpdf(mu, x, mean_eps=0.01):
     return np.sum(x * np.log(mu2) - mu2, axis=1)
 
 
-def train_and_test(trial_reach_target, plan_spikes,):
+def train_and_test(trial_reach_target, plan_spikes):
     training_trials = []
     test_trials = []
     for c in range(8):
@@ -108,4 +119,14 @@ def graph_window_length_comparison(decode_perf):
     fig = plt.figure(figsize=(12, 12))
     ax = sns.violinplot(data=pd.DataFrame(decode_perf.T, columns=np.arange(50, 800, 50)))
     ax.set(xlabel='Duración de ventana', ylabel='Precisión decodificando')
+    fig.show()
 
+
+def graph_offset_comparison(offsets, correct):
+    plt.scatter(offsets, correct, marker='o')
+
+    plt.xlabel(f'Offsets')
+    plt.ylabel(f'Precisión decodificando')
+    plt.grid(True)
+
+    plt.show()
