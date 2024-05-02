@@ -56,7 +56,7 @@ def ej2():
     graph_precisions_firings(["Mayor tasa", "Menor tasa", "Aleatoria"], [precisions_highest, precisions_lowest, precisions_random])
 
 
-def test_using_selected_spikes(repetitions, time_touch_held, selected_spike_times, time_go_cue, trial_reach_target, ):
+def test_using_selected_spikes(repetitions, time_touch_held, selected_spike_times, time_go_cue, trial_reach_target):
     precisions = []
     for _ in range(repetitions):
         plan_spikes = extract_plan_spikes(time_touch_held, selected_spike_times, time_go_cue, 250, 100)

@@ -23,13 +23,13 @@ def extract_plan_spikes(time_touch_held, spike_times, time_go_cue, window_length
     return np.array(plan_spikes)
 
 
-def train_and_test(trial_reach_target, plan_spikes):
+def train_and_test(trial_reach_target, plan_spikes, size=25):
     training_trials = []
     test_trials = []
     for c in range(8):
         target_trials = np.argwhere((trial_reach_target == c)).squeeze()
 
-        random_training_trials = np.random.choice(target_trials, 25, replace=False)
+        random_training_trials = np.random.choice(target_trials, size, replace=False)
         training_trials.append(random_training_trials)
         remaining_test_trials = np.setdiff1d(target_trials, random_training_trials)
 
